@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe App</title>
+    <style>
+        body {
+            font-family: monospace;
+            margin: 0;
+            padding: 0;
+            background-color: pink;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: pink;
+        }
+        td {
+            background-color: #fff;
+        }
+        #choosediv{
+            margin-top: 10%;
+            margin-left: 25%;
+            font-size: x-large;
+        }
+    </style>
+</head>
+<body>
+    <div id = choosediv>
+    <label for="cars" id="chooselabel">Choose a Recipe:</label>
+    <select id="optionSelect" name="optionSelect">
+        <!-- Options  -->
+      </select>
+</div>
+    <div class="container">
+        <h1>Recipes</h1>
+        <table id="recipeTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Ingredients</th>
+                    <th>Instructions</th>
+                    <th>Cooking Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Recipes -->
+            </tbody>
+            <button id = add>Add</button>
+        </table>
+    </div>
+</body>
+<script>
+document.getElementById('add').addEventListener('click', function() {
+            window.location.href = 'form.html';
+});
+    function createRecipeRow(recipe) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${recipe.title}</td>
+                <td>${recipe.ingredients}</td>
+                <td>${recipe.instructions}</td>
+                <td>${recipe.cookingTime}</td>
+                <td>
+                    <button onclick="deleteRecipe('${recipe.title}')">Remove</button>
+                    <button onclick="modifyRecipe('${recipe.title}')">Modify</button>
+                </td>
+            `
+            return row;
+        }
+
+// Delete Recipe
+function deleteRecipe(title) {
+    fetch(`/recipes/${title}`, {
+        method: 'DELETE'
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('Recipe deleted successfully');
+            location.reload();
+        } else {
+            console.error('Error deleting recipe:', response.statusText);
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting recipe:', error);
+    });
+}
+
+//Modify Recipe
+function modifyRecipe(selectedOption) {
+    fetch(`/modify/${selectedOption}`)
+        .then(response => response.json())
+        .then(recipe => {
+            title = recipe.title
+            window.location.href = `putform.html?title=${encodeURIComponent(title)}`;
+        })
+        .catch(error => {
+            console.error('Error fetching recipe details:', error);
+        });
+}
+
+
+
+
+        // Load all recipes
+        fetch('/recipes')
+            .then(response => response.json())
+            .then(recipes => {
+                const recipeTableBody = document.querySelector('#recipeTable tbody');
+
+                recipes.forEach(recipe => {
+                    const row = createRecipeRow(recipe);
+                    row.setAttribute('data-id', recipe._id);
+                    recipeTableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching recipes:', error);
+            });
+
+
+    //Handle option tab
+    fetch('/options')
+    .then(response => response.json())
+    .then(options => {
+    
+      const selectElement = document.getElementById('optionSelect');
+
+      // Loop through the options and create option elements
+      console.log(options)
+      options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.title; 
+        optionElement.textContent = option.title; 
+        selectElement.appendChild(optionElement); 
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching options:', error);
+    });
+
+    document.getElementById('optionSelect').addEventListener('change', function() {
+  const selectedOption = this.value;
+
+
+
+
+  // Handle option part 2
+  fetch(`/recipes/${selectedOption}`)
+    .then(response => response.json())
+    .then(recipes => {
+      const recipeTableBody = document.querySelector('#recipeTable tbody');
+      
+      // Clear existing content from the table body
+      recipeTableBody.innerHTML = '';
+
+      // Loop through the fetched recipes
+      recipes.forEach(recipe => {
+        // Create a row for each recipe and append it to the table
+        const row = createRecipeRow(recipe);
+        row.setAttribute('data-id', recipe._id);
+        recipeTableBody.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching recipes:', error);
+    });
+});
+    </script>
+</html>
