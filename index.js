@@ -1,4 +1,4 @@
-const PORT = 3001 || process.env.PORT
+const PORT = 5000 || process.env.PORT
 const express = require ("express")
 const connection= require("./connection")
 const app = express()
