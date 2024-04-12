@@ -92,20 +92,25 @@ document.getElementById('add').addEventListener('click', function() {
 
 // Delete Recipe
 function deleteRecipe(title) {
-    fetch(`/recipes/${title}`, {
-        method: 'DELETE'
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log('Recipe deleted successfully');
-            location.reload();
-        } else {
-            console.error('Error deleting recipe:', response.statusText);
-        }
-    })
-    .catch(error => {
-        console.error('Error deleting recipe:', error);
-    });
+    if (window.confirm(`Are you sure you want to delete the recipe "${title}"?`)) {
+        fetch(`/recipes/${title}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Recipe deleted successfully');
+                location.reload();
+            } else {
+                console.error('Error deleting recipe:', response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting recipe:', error);
+        });
+    } else {
+        // If user cancels, do nothing
+        console.log('Deletion cancelled');
+    }
 }
 
 //Modify Recipe
